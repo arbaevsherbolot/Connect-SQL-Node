@@ -6,11 +6,27 @@ const get = async (req, res) => {
 
     if (users) {
       res.json(users);
+    } else if (users === []) {
+      res.send("Users is not found");
     } else {
-      res.send("Error: No users");
+      res.send("Error 404");
     }
   } catch (err) {
     console.log(err);
+  }
+};
+
+const getUser = async (req, res) => {
+  let { username, password } = req.body;
+
+  if (username !== "" || password !== "") {
+    const user = await knex("all_users")
+      .where({ username: `${username}`, password: `${password}` })
+      .select();
+
+    res.send(user);
+  } else {
+    res.send("For all values, the field!");
   }
 };
 
@@ -18,44 +34,46 @@ const post = async (req, res) => {
   let { username, email, password } = req.body;
 
   try {
-    const result = await knex("all_users").insert({
-      username: `${username}`,
-      email: `${email}`,
-      password: `${password}`,
-    });
+    if (username !== "" || email !== "" || password !== "") {
+      const result = await knex("all_users").insert({
+        username: `${username}`,
+        email: `${email}`,
+        password: `${password}`,
+      });
 
-    if (result) {
       res.send("User created successfully!");
+      console.log(result.json());
     } else {
-      res.send("User already exists!");
-      å;
+      res.send("For all values, the field!");
     }
-  } catch (err) {
-    console.log(err);
-    res.send("Error creating user!");
+  } catch {
+    res.send("User already exists!");
   }
 };
 
 const put = async (req, res) => {
-  let { username, email, password } = req.body;
+  let { username } = req.body;
 
   try {
-    const result = await knex("all_users")
-      .where("username", req.params.username)
-      .update({ username: `${username}` });
+    if (username !== "") {
+      const result = await knex("all_users")
+        .where("username", req.params.username)
+        .update({ username: `${username}` });
 
-    if (result) {
       res.send(`User updated successfully!, new username: ${username}`);
+      console.log(result);
     } else {
-      res.send(`Error updating user!`);
+      res.send(`For all values, the field!`);
     }
   } catch (err) {
     console.log(err);
+    res.send(`Error updating user!`);
   }
 };
 
 module.exports = {
-  post,
   get,
+  getUser,
+  post,
   put,
 };
